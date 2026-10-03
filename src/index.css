@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #fbf6ec;
+  --color-gold-100: #f3e8cc;
+  --color-gold-200: #e6d19d;
+  --color-gold-300: #d4b570;
+  --color-gold-400: #c29a4e;
+  --color-gold-500: #a67c34;
+  --color-gold-600: #8b6526;
+  --color-gold-700: #6e4e1e;
+  --color-gold-800: #513a17;
+  --color-gold-900: #362710;
+
+  --color-cream: #faf7f0;
+  --color-cream-dark: #f0ead9;
+  --color-charcoal: #1c1917;
+  --color-charcoal-light: #57534e;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+}
+
+:root {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
