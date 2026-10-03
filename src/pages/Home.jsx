@@ -60,6 +60,12 @@ const GlobalStyle = () => (
     @keyframes bk-float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(3deg)}}
     @keyframes bk-blob{0%,100%{border-radius:42% 58% 63% 37%/45% 41% 59% 55%}50%{border-radius:61% 39% 38% 62%/57% 62% 38% 43%}}
     @keyframes bk-gradient{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    @keyframes bk-orb-a{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.2)}}
+    @keyframes bk-orb-b{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,20px) scale(0.85)}}
+    @keyframes bk-orb-c{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.15)}}
+    @keyframes bk-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+    @keyframes bk-rise{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-90vh) scale(0.4);opacity:0}}
+    @keyframes bk-sheen{0%{transform:translateX(0)}60%,100%{transform:translateX(500%)}}
     .bk-marquee{animation:bk-marquee 30s linear infinite}
     .bk-shine::after{content:'';position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:bk-shine 3.2s ease-in-out infinite}
     .bk-float{animation:bk-float 6s ease-in-out infinite}
@@ -282,7 +288,7 @@ function ScrollBar() {
   );
 }
 
-/* ───────────────────────── HERO — UNCHANGED ───────────────────────── */
+/* ───────────────────────── HERO — MOBILE ANIMATED ───────────────────────── */
 function Hero({ slide, active, onSelect }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
@@ -306,57 +312,307 @@ function Hero({ slide, active, onSelect }) {
         </AnimatePresence>
       </motion.div>
 
-      {/* ✅ Overlay ONLY on mobile */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-white/95 via-white/70 to-white/30 sm:hidden" />
+      {/* Mobile overlay: strong at top for text, transparent in the middle so the banner shows, subtle at bottom */}
+<div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/95 via-white/60 to-white/80 sm:hidden" />
+
+      {/* ───── MOBILE-ONLY CREATIVE ANIMATED LAYER ───── */}
+      <div className="pointer-events-none absolute inset-0 -z-[5] overflow-hidden opacity-60 sm:hidden">
+        {/* Warm gradient wash */}
+        <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.18),transparent_55%),radial-gradient(ellipse_at_bottom,rgba(185,28,28,0.12),transparent_60%)]" />
+
+        {/* Aurora orbs */}
+        <span
+          className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-gradient-to-br from-amber-300/50 via-amber-200/30 to-transparent blur-3xl"
+          style={{ animation: 'bk-orb-a 14s ease-in-out infinite' }}
+        />
+        <span
+          className="absolute -right-24 top-1/3 h-72 w-72 rounded-full bg-gradient-to-br from-red-400/40 via-red-300/20 to-transparent blur-3xl"
+          style={{ animation: 'bk-orb-b 18s ease-in-out infinite' }}
+        />
+        <span
+          className="absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-gradient-to-tr from-amber-400/40 to-transparent blur-3xl"
+          style={{ animation: 'bk-orb-c 16s ease-in-out infinite' }}
+        />
+
+        {/* Rotating mandala */}
+        <motion.svg
+          viewBox="0 0 200 200"
+          className="absolute left-1/2 top-1/2 h-[24rem] w-[24rem] -translate-x-1/2 -translate-y-1/2 opacity-[0.18]"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+        >
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#b45309" strokeWidth="0.8" strokeDasharray="2 6" />
+          <circle cx="100" cy="100" r="72" fill="none" stroke="#b45309" strokeWidth="0.6" strokeDasharray="1 4" />
+          {Array.from({ length: 24 }).map((_, i) => {
+            const a = (i / 24) * Math.PI * 2;
+            const x1 = 100 + Math.cos(a) * 82;
+            const y1 = 100 + Math.sin(a) * 82;
+            const x2 = 100 + Math.cos(a) * 90;
+            const y2 = 100 + Math.sin(a) * 90;
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#b45309" strokeWidth="0.6" />;
+          })}
+        </motion.svg>
+        <motion.svg
+          viewBox="0 0 200 200"
+          className="absolute left-1/2 top-1/2 h-[18rem] w-[18rem] -translate-x-1/2 -translate-y-1/2 opacity-[0.22]"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+        >
+          {Array.from({ length: 60 }).map((_, i) => {
+            const a = (i / 60) * Math.PI * 2;
+            const r = 78;
+            const x = 100 + Math.cos(a) * r;
+            const y = 100 + Math.sin(a) * r;
+            return <circle key={i} cx={x} cy={y} r="0.8" fill="#b45309" />;
+          })}
+        </motion.svg>
+
+        {/* Saffron thread waves */}
+        <motion.svg
+          viewBox="0 0 400 800"
+          preserveAspectRatio="none"
+          className="absolute inset-0 h-full w-full opacity-25"
+        >
+          <motion.path
+            d="M40 -50 Q 90 150, 30 350 T 60 750"
+            fill="none"
+            stroke="#d97706"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: [0, 1, 1, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.path
+            d="M360 -50 Q 320 200, 380 400 T 340 800"
+            fill="none"
+            stroke="#b45309"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: [0, 1, 1, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+          />
+        </motion.svg>
+
+        {/* Rotating conic ring */}
+        <span
+          className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25"
+          style={{
+            background:
+              'conic-gradient(from 0deg, rgba(251,191,36,0) 0deg, rgba(251,191,36,0.55) 90deg, rgba(185,28,28,0.45) 180deg, rgba(251,191,36,0) 360deg)',
+            maskImage: 'radial-gradient(circle, transparent 62%, black 63%, black 66%, transparent 67%)',
+            WebkitMaskImage:
+              'radial-gradient(circle, transparent 62%, black 63%, black 66%, transparent 67%)',
+            animation: 'bk-spin 22s linear infinite',
+          }}
+        />
+
+        {/* Floating particles */}
+        {Array.from({ length: 18 }).map((_, i) => {
+          const left = (i * 37) % 100;
+          const size = 2 + ((i * 7) % 5);
+          const delay = (i * 0.7).toFixed(2);
+          const dur = 8 + ((i * 3) % 9);
+          const isStar = i % 5 === 0;
+          return isStar ? (
+            <span
+              key={i}
+              className="absolute text-amber-400/80"
+              style={{
+                left: `${left}%`,
+                bottom: '-10px',
+                fontSize: `${size + 6}px`,
+                lineHeight: 1,
+                animation: `bk-rise ${dur}s linear ${delay}s infinite`,
+              }}
+            >
+              ✦
+            </span>
+          ) : (
+            <span
+              key={i}
+              className="absolute rounded-full bg-amber-400/70 shadow-[0_0_12px_rgba(251,191,36,0.7)]"
+              style={{
+                left: `${left}%`,
+                bottom: '-10px',
+                width: size,
+                height: size,
+                animation: `bk-rise ${dur}s linear ${delay}s infinite`,
+              }}
+            />
+          );
+        })}
+
+        {/* Leafy flourish — top-left */}
+        <svg
+          className="absolute -left-6 top-4 h-40 w-40 text-red-700/30"
+          viewBox="0 0 200 200"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        >
+          <motion.path
+            d="M10 190 C 60 150, 60 90, 120 40 S 180 20, 195 10"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 3, ease: 'easeInOut' }}
+          />
+          {[[50, 150], [80, 110], [110, 80], [140, 55], [165, 35]].map(([cx, cy], i) => (
+            <motion.ellipse
+              key={i}
+              cx={cx} cy={cy} rx="10" ry="4"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.6 + i * 0.2, duration: 0.6, ease: 'easeOut' }}
+              style={{ transformOrigin: `${cx}px ${cy}px`, transformBox: 'fill-box' }}
+            />
+          ))}
+        </svg>
+
+        {/* Leafy flourish — bottom-right */}
+        <svg
+          className="absolute -right-6 bottom-4 h-44 w-44 text-amber-600/40"
+          viewBox="0 0 200 200"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        >
+          <motion.path
+            d="M195 10 C 140 40, 150 100, 100 140 S 20 180, 5 195"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 3, ease: 'easeInOut', delay: 0.3 }}
+          />
+          {[[160, 40], [140, 80], [110, 115], [70, 150], [35, 175]].map(([cx, cy], i) => (
+            <motion.ellipse
+              key={i}
+              cx={cx} cy={cy} rx="10" ry="4"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.9 + i * 0.2, duration: 0.6, ease: 'easeOut' }}
+              style={{ transformOrigin: `${cx}px ${cy}px`, transformBox: 'fill-box' }}
+            />
+          ))}
+        </svg>
+
+        {/* Sheen sweep */}
+        <span
+          className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+          style={{ animation: 'bk-sheen 6s ease-in-out infinite' }}
+        />
+      </div>
+      {/* ───── END MOBILE LAYER ───── */}
 
       <motion.div
         style={{ opacity: fade }}
-        className="relative mx-auto flex min-h-[70vh] max-w-7xl flex-col justify-center px-4 py-14 sm:px-8 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
+        className="relative mx-auto flex min-h-[80vh] max-w-7xl flex-col px-4 pb-6 pt-3 sm:min-h-[70vh] sm:justify-center sm:px-8 sm:py-14 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE }}
-          className="flex max-w-xl flex-col items-start gap-5"
+          className="flex flex-col items-start gap-2 sm:gap-5"
         >
-          <span className="rounded-full border border-red-700/40 bg-white/80 px-3.5 py-1 text-[11px] font-semibold tracking-wide text-red-700 backdrop-blur-sm">
+          <span className="rounded-full border border-red-700/40 bg-white/80 px-3.5 py-1 text-[10px] font-semibold tracking-wide text-red-700 backdrop-blur-sm sm:text-[11px]">
             The Original House Since 1940
           </span>
 
-          <h1 className="font-serif text-3xl font-medium leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl md:text-5xl lg:text-6xl">
+          <h1 className="font-serif text-3xl font-medium leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl md:text-5xl lg:text-6xl">
             <RevealWords text="Make Your Special" delay={0.15} />
             <br />
             <RevealWords text="Moments More" delay={0.35} />
             <RevealWords text="Special" className="italic text-red-700" delay={0.55} />
           </h1>
 
-          {/* ✅ Paragraph: bold + smaller on mobile */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="max-w-md text-xs font-bold leading-relaxed text-neutral-800 sm:text-sm sm:font-normal sm:text-neutral-700 md:text-base"
+            className="max-w-md text-xs font-semibold leading-relaxed text-neutral-800 sm:text-sm sm:font-normal sm:text-neutral-700 md:text-base mt-1"
           >
-            Premium organic groceries, dry fruits, and gift hampers, sourced directly from trusted farms and
-            delivered with love to your doorstep.
+            Premium organic groceries, dry fruits, and gift hampers — sourced from trusted farms and
+            delivered with love. From hand-picked almonds, cashews and dates to fresh saffron and
+            traditional spices, every product is carefully checked and sealed for freshness, just as our
+            family has trusted since 1940.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.95, duration: 0.5 }}
-            className="flex flex-wrap items-center gap-3 pt-1"
+            transition={{ delay: 0.9, duration: 0.5 }}
+            className="flex flex-wrap gap-2 pt-0 sm:pt-1"
           >
-            <MagneticLink to="/category/all" className="bk-shine bg-red-700 text-white shadow-lg shadow-red-700/30">
-              Shop Now
-              <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
-            </MagneticLink>
-            <MagneticLink to="/about" className="border border-red-700 bg-white/80 text-red-700 hover:bg-red-700 hover:text-white">
-              Our Story
-            </MagneticLink>
+            {['Dry Fruits', 'Hampers', 'Organic', 'Spices', 'Dates'].map((tag) => (
+              <Link
+                key={tag}
+                to="/category/all"
+                className="rounded-full border border-red-700/30 bg-white/85 px-3 py-1 text-[10px] font-semibold text-red-700 backdrop-blur-sm transition hover:bg-red-700 hover:text-white sm:text-xs"
+              >
+                {tag}
+              </Link>
+            ))}
           </motion.div>
 
-          <div className="flex items-center gap-1.5 pt-2">
+          {/* ── Centered floating banner image (mobile only) ── */}
+                 {/* ── Centered floating banner image (mobile only) ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 1.0, duration: 0.7, ease: EASE }}
+            className="relative mx-auto mt-4 w-full max-w-[19rem] self-center sm:hidden"
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/70 bg-white p-1.5 shadow-[0_20px_45px_-15px_rgba(185,28,28,0.35)]"
+            >
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={slide.src}
+                  src={slide.src}
+                  alt={slide.alt}
+                  initial={{ opacity: 0, scale: 1.08 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.08 }}
+                  transition={{ duration: 0.7, ease: 'easeInOut' }}
+                  className="h-full w-full rounded-[1.6rem] object-cover object-right"
+                />
+              </AnimatePresence>
+
+              <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-red-700 shadow-sm backdrop-blur-sm">
+                Since 1940
+              </span>
+            </motion.div>
+
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+              className="absolute -right-3 -top-3 flex h-16 w-16 items-center justify-center rounded-full bg-amber-400 text-center text-[8px] font-extrabold leading-tight text-red-900 shadow-xl"
+            >
+              100%<br />ORGANIC
+            </motion.div>
+
+            <span className="pointer-events-none absolute -inset-6 -z-10 mx-auto h-full w-full rounded-full bg-amber-300/25 blur-3xl" />
+          </motion.div>
+        </motion.div>
+
+        {/* ── Buttons (below image card on mobile, inline on desktop) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.15, duration: 0.5 }}
+          className="mt-6 flex flex-wrap items-center gap-3 pt-2 sm:mt-4 sm:pt-0"
+        >
+          <MagneticLink to="/category/all" className="bk-shine bg-red-700 text-white shadow-lg shadow-red-700/30">
+            Shop Now
+            <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.4, repeat: Infinity }}>→</motion.span>
+          </MagneticLink>
+          <MagneticLink to="/about" className="border border-red-700 bg-white/80 text-red-700 hover:bg-red-700 hover:text-white">
+            Our Story
+          </MagneticLink>
+
+          <div className="ml-auto flex items-center gap-1.5 sm:ml-4">
             {HERO_SLIDES.map((_, i) => (
               <button
                 key={i}
@@ -372,6 +628,7 @@ function Hero({ slide, active, onSelect }) {
     </section>
   );
 }
+
 /* ───────────────────────── MARQUEE ───────────────────────── */
 function Marquee() {
   const row = [...MARQUEE, ...MARQUEE];

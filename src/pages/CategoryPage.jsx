@@ -109,7 +109,9 @@ export default function CategoryPage() {
               Home
             </Link>
             <span className="text-yellow-400">/</span>
-            <span className="font-semibold text-yellow-300">{current?.name || slug}</span>
+            <span className="font-semibold text-yellow-300">
+              {current?.name || (slug === 'all' ? 'All Products' : slug)}
+            </span>
           </motion.nav>
 
           {/* Eyebrow */}
@@ -143,7 +145,7 @@ export default function CategoryPage() {
             transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
             className="font-serif text-4xl capitalize leading-tight text-white sm:text-5xl lg:text-6xl"
           >
-            {current?.name || slug}
+            {current?.name || (slug === 'all' ? 'All Products' : slug)}
           </motion.h1>
 
           {/* Subtitle */}
@@ -219,6 +221,14 @@ export default function CategoryPage() {
                   Category
                 </h3>
                 <div className="space-y-2">
+                  {slug === 'all' && (
+                    <FilterRadio
+                      as={Link}
+                      to="/category/all"
+                      label="All Products"
+                      checked
+                    />
+                  )}
                   {parentSlug && (
                     <FilterRadio
                       as={Link}
