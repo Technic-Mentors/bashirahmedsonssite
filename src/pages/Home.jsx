@@ -297,7 +297,7 @@ function Hero({ slide, active, onSelect }) {
             key={slide.src}
             src={slide.src}
             alt={slide.alt}
-            className="h-full w-full object-cover object-right"
+            className="h-full w-full object-cover object-center sm:object-right"
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1.05 }}
             exit={{ opacity: 0, scale: 1.1 }}
@@ -306,9 +306,12 @@ function Hero({ slide, active, onSelect }) {
         </AnimatePresence>
       </motion.div>
 
+      {/* ✅ Overlay ONLY on mobile */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-white/95 via-white/70 to-white/30 sm:hidden" />
+
       <motion.div
         style={{ opacity: fade }}
-        className="mx-auto flex min-h-[70vh] max-w-7xl flex-col justify-center px-4 py-14 sm:px-8 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
+        className="relative mx-auto flex min-h-[70vh] max-w-7xl flex-col justify-center px-4 py-14 sm:px-8 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -316,22 +319,23 @@ function Hero({ slide, active, onSelect }) {
           transition={{ duration: 0.6, ease: EASE }}
           className="flex max-w-xl flex-col items-start gap-5"
         >
-          <span className="rounded-full border border-red-700/40 bg-white/70 px-3.5 py-1 text-[11px] font-semibold tracking-wide text-red-700">
+          <span className="rounded-full border border-red-700/40 bg-white/80 px-3.5 py-1 text-[11px] font-semibold tracking-wide text-red-700 backdrop-blur-sm">
             The Original House Since 1940
           </span>
 
-          <h1 className="font-serif text-4xl font-medium leading-[1.1] tracking-tight text-black sm:text-5xl lg:text-6xl">
+          <h1 className="font-serif text-3xl font-medium leading-[1.1] tracking-tight text-neutral-900 sm:text-4xl md:text-5xl lg:text-6xl">
             <RevealWords text="Make Your Special" delay={0.15} />
             <br />
             <RevealWords text="Moments More" delay={0.35} />
             <RevealWords text="Special" className="italic text-red-700" delay={0.55} />
           </h1>
 
+          {/* ✅ Paragraph: bold + smaller on mobile */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="max-w-md text-sm leading-relaxed text-gray-700 sm:text-base"
+            className="max-w-md text-xs font-bold leading-relaxed text-neutral-800 sm:text-sm sm:font-normal sm:text-neutral-700 md:text-base"
           >
             Premium organic groceries, dry fruits, and gift hampers, sourced directly from trusted farms and
             delivered with love to your doorstep.
@@ -368,7 +372,6 @@ function Hero({ slide, active, onSelect }) {
     </section>
   );
 }
-
 /* ───────────────────────── MARQUEE ───────────────────────── */
 function Marquee() {
   const row = [...MARQUEE, ...MARQUEE];
