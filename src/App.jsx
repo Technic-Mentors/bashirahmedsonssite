@@ -70,8 +70,8 @@ function PageFallback() {
 }
 
 /* ═══════════════ Floating WhatsApp Button ═══════════════ */
-const WHATSAPP_NUMBER = '923221527802'; // +92 322 1527802 (no + or spaces)
-const WHATSAPP_MESSAGE = 'Assalam-o-Alaikum! I have a question about your Hajj & Umrah garments.';
+const WHATSAPP_NUMBER = '923202644545'; // +92 322 1527802 (no + or spaces)
+const WHATSAPP_MESSAGE = 'Assalam-o-Alaikum! I have a question about deals available.';
 
 function FloatingWhatsApp() {
   const { pathname } = useLocation();
