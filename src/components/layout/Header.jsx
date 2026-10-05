@@ -22,6 +22,9 @@ const YOUTUBE_URL = 'https://www.youtube.com/channel/UCEoAQeohCsUl-sazMtD0mcA';
 
 const Header = React.forwardRef(function Header(_, ref) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [mobileExpandedCat, setMobileExpandedCat] = useState(null);
+
   const customer = useAuthStore((s) => s.customer);
   const items = useCartStore((s) => s.items);
   const count = cartItemCount(items);
@@ -39,246 +42,374 @@ const Header = React.forwardRef(function Header(_, ref) {
     }
   }, [customer, wishlistLoaded]);
 
-  return (
-    <header
-      ref={ref}
-      className="sticky top-0 z-40 border-b border-yellow-600/20 bg-white/95 backdrop-blur"
-    >
-      {/* ══════════════ TOP ANNOUNCEMENT STRIP (RED BG) ══════════════ */}
-      <div className="relative overflow-hidden bg-red-700">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1),transparent_70%)]" />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
-          <p className="text-[11px] font-medium tracking-wide text-white sm:text-xs">
-            Welcome to{' '}
-            <span className="font-semibold text-yellow-300">Bashir Ahmed Sons</span>
-            <span className="mx-1.5 text-white/70">—</span>
-            <span className="text-white/90">Premium Organic Since 1940</span>
-          </p>
+  // Reset mobile category states when the drawer closes
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      setMobileCategoriesOpen(false);
+      setMobileExpandedCat(null);
+    }
+  }, [mobileMenuOpen]);
 
-          <div className="flex items-center gap-0.5">
-            <a
-              href={FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
-            >
-              <FacebookIcon />
-            </a>
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
-            >
-              <InstagramIcon />
-            </a>
-            <a
-              href={YOUTUBE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="YouTube"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
-            >
-              <YouTubeIcon />
-            </a>
+  // 🔒 Lock body scroll when full-screen mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
+  }, [mobileMenuOpen]);
+
+  return (
+    <>
+      {/* ══════════════ STICKY HEADER ══════════════ */}
+      <header
+        ref={ref}
+        className="sticky top-0 z-40 border-b border-yellow-600/20 bg-white/95 backdrop-blur"
+      >
+        {/* ══════════════ TOP ANNOUNCEMENT STRIP (RED BG) ══════════════ */}
+        <div className="relative overflow-hidden bg-red-700">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1),transparent_70%)]" />
+          <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
+            <p className="text-[11px] font-medium tracking-wide text-white sm:text-xs">
+              Welcome to{' '}
+              <span className="font-semibold text-yellow-300">Bashir Ahmed Sons</span>
+              <span className="mx-1.5 text-white/70">—</span>
+              <span className="text-white/90">Premium Organic Since 1940</span>
+            </p>
+
+            <div className="flex items-center gap-0.5">
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
+              >
+                <FacebookIcon />
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
+              >
+                <InstagramIcon />
+              </a>
+              <a
+                href={YOUTUBE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition-all duration-300 hover:bg-white/15 hover:text-yellow-300"
+              >
+                <YouTubeIcon />
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ══════════════ MAIN HEADER ══════════════ */}
-      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-2.5 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <img src="/logo.png" alt="Bashir Ahmed Sons" className="h-12 w-12" />
-          <span className="hidden font-serif text-xl font-semibold tracking-wide text-black sm:block">
-            Bashir Ahmed Sons
-          </span>
-        </Link>
-
-        <nav className="hidden items-center justify-center gap-6 md:flex">
-          <NavLink to="/" end className={({ isActive }) => navLinkClass(isActive)}>
-            Home
-          </NavLink>
-
-          <CategoriesDropdown
-            topCategories={topCategories}
-            subcategoriesOf={subcategoriesOf}
-          />
-
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="flex items-center justify-end gap-4">
-          <div className="hidden lg:block lg:w-44 xl:w-56">
-            <SearchBar
-              placeholder="Search..."
-              iconClassName="left-2.5"
-              inputClassName="w-full rounded-full border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-red-700 focus:outline-none"
-            />
-          </div>
-
-          <Link
-            to="/search"
-            aria-label="Search"
-            className="flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700 lg:hidden"
-          >
-            <SearchIcon />
+        {/* ══════════════ MAIN HEADER ══════════════ */}
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-2.5 sm:px-6">
+          <Link to="/" className="flex shrink-0 items-center gap-2.5">
+            <img src="/logo.png" alt="Bashir Ahmed Sons" className="h-12 w-12" />
+            <span className="hidden font-serif text-xl font-semibold tracking-wide text-black sm:block">
+              Bashir Ahmed Sons
+            </span>
           </Link>
 
-          <div className="flex items-center gap-3.5">
-            {customer && <CustomerNotificationBell />}
+          <nav className="hidden items-center justify-center gap-6 md:flex">
+            <NavLink to="/" end className={({ isActive }) => navLinkClass(isActive)}>
+              Home
+            </NavLink>
+
+            <CategoriesDropdown
+              topCategories={topCategories}
+              subcategoriesOf={subcategoriesOf}
+            />
+
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) => navLinkClass(isActive)}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex items-center justify-end gap-4">
+            <div className="hidden lg:block lg:w-44 xl:w-56">
+              <SearchBar
+                placeholder="Search..."
+                iconClassName="left-2.5"
+                inputClassName="w-full rounded-full border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-red-700 focus:outline-none"
+              />
+            </div>
 
             <Link
-              to={customer ? '/account/wishlist' : '/login'}
-              aria-label="Wishlist"
-              className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
+              to="/search"
+              aria-label="Search"
+              className="flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700 lg:hidden"
             >
-              <HeartIcon />
-              {wishlistCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white">
-                  {wishlistCount}
-                </span>
-              )}
+              <SearchIcon />
             </Link>
 
-            <Link
-              to={customer ? '/account' : '/login'}
-              aria-label="Account"
-              className="hidden h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700 sm:flex"
-            >
-              <UserIcon />
-            </Link>
+            <div className="flex items-center gap-3.5">
+              {customer && <CustomerNotificationBell />}
 
-            <Link
-              to="/cart"
-              aria-label="Cart"
-              className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
+              <Link
+                to={customer ? '/account/wishlist' : '/login'}
+                aria-label="Wishlist"
+                className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
+              >
+                <HeartIcon />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                to={customer ? '/account' : '/login'}
+                aria-label="Account"
+                className="hidden h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700 sm:flex"
+              >
+                <UserIcon />
+              </Link>
+
+              <Link
+                to="/cart"
+                aria-label="Cart"
+                className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
+              >
+                <CartIcon />
+                {count > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white">
+                    {count}
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            <button
+              aria-label="Menu"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="text-gray-600 hover:text-red-700 md:hidden"
             >
-              <CartIcon />
-              {count > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white">
-                  {count}
-                </span>
-              )}
-            </Link>
+              <MenuIcon />
+            </button>
           </div>
-
-          <button
-            aria-label="Menu"
-            onClick={() => setMobileMenuOpen((v) => !v)}
-            className="text-gray-600 hover:text-red-700 md:hidden"
-          >
-            <MenuIcon />
-          </button>
         </div>
-      </div>
+      </header>
 
+      {/* ══════════════ MOBILE MENU — FULL SCREEN OVERLAY (OUTSIDE HEADER) ══════════════ */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-gray-200 bg-white md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed inset-0 z-[100] flex flex-col bg-white md:hidden"
           >
-            <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
-              <SearchBar
-                placeholder="Search products..."
-                iconClassName="left-3"
-                inputClassName="w-full rounded-full border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-red-700 focus:outline-none"
-                onNavigate={() => setMobileMenuOpen(false)}
-              />
-
-              <NavLink
+            {/* Top bar: logo + close */}
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+              <Link
                 to="/"
-                end
                 onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) => navLinkClass(isActive)}
+                className="flex items-center gap-2.5"
               >
-                Home
-              </NavLink>
+                <img src="/logo.png" alt="Bashir Ahmed Sons" className="h-10 w-10" />
+                <span className="font-serif text-lg font-semibold tracking-wide text-black">
+                  Bashir Ahmed Sons
+                </span>
+              </Link>
 
-              {topCategories.map((cat) => (
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition-colors hover:bg-gray-100 hover:text-red-700"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
+              <div className="flex flex-col gap-1">
+                <SearchBar
+                  placeholder="Search products..."
+                  iconClassName="left-3"
+                  inputClassName="w-full rounded-full border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-red-700 focus:outline-none"
+                  onNavigate={() => setMobileMenuOpen(false)}
+                />
+
                 <NavLink
-                  key={cat.id}
-                  to={`/category/${cat.slug}`}
+                  to="/"
+                  end
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => navLinkClass(isActive)}
+                  className={({ isActive }) => mobileNavLinkClass(isActive)}
                 >
-                  {cat.name}
+                  Home
                 </NavLink>
-              ))}
 
-              {NAV_LINKS.map((link) => (
+                {/* ─── COMPACT MOBILE CATEGORIES (Screenshot Style) ─── */}
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setMobileCategoriesOpen((v) => !v)}
+                    className="flex w-full items-center justify-between px-1 py-3 text-[15px] font-medium text-gray-800 transition-colors hover:text-red-700"
+                  >
+                    <span>Categories</span>
+                    <ChevronIcon open={mobileCategoriesOpen} />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {mobileCategoriesOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        {topCategories.length === 0 ? (
+                          <p className="px-1 py-2 text-sm text-gray-500">No categories yet.</p>
+                        ) : (
+                          <ul className="flex flex-col gap-1.5 pb-2 pl-4 pr-2">
+                            {topCategories.map((cat) => {
+                              const subs = subcategoriesOf(cat.id);
+                              const isExpanded = mobileExpandedCat === cat.id;
+
+                              return (
+                                <li key={cat.id} className="flex flex-col">
+                                  <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100">
+                                    <Link
+                                      to={`/category/${cat.slug}`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="flex-1 text-[14px] font-medium text-gray-700 hover:text-red-700"
+                                    >
+                                      {cat.name}
+                                    </Link>
+
+                                    {subs.length > 0 && (
+                                      <button
+                                        type="button"
+                                        aria-label={`Toggle ${cat.name} subcategories`}
+                                        onClick={() =>
+                                          setMobileExpandedCat((prev) =>
+                                            prev === cat.id ? null : cat.id
+                                          )
+                                        }
+                                        className="ml-2 flex h-6 w-6 items-center justify-center text-gray-400 hover:text-red-700"
+                                      >
+                                        <ChevronIcon open={isExpanded} />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <AnimatePresence initial={false}>
+                                    {isExpanded && subs.length > 0 && (
+                                      <motion.ul
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                                        className="overflow-hidden"
+                                      >
+                                        <div className="mt-1 ml-2 flex flex-col border-l-2 border-gray-200 pl-3">
+                                          {subs.map((sub) => (
+                                            <Link
+                                              key={sub.id}
+                                              to={`/category/${sub.slug}`}
+                                              onClick={() => setMobileMenuOpen(false)}
+                                              className="py-2 text-[13.5px] text-gray-600 hover:text-red-700"
+                                            >
+                                              {sub.name}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </motion.ul>
+                                    )}
+                                  </AnimatePresence>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {NAV_LINKS.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) => mobileNavLinkClass(isActive)}
+                  >
+                    {link.label}
+                  </NavLink>
+                ))}
+
                 <NavLink
-                  key={link.to}
-                  to={link.to}
+                  to={customer ? '/account/wishlist' : '/login'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => navLinkClass(isActive)}
+                  className={({ isActive }) => mobileNavLinkClass(isActive)}
                 >
-                  {link.label}
+                  Wishlist
                 </NavLink>
-              ))}
 
-              <NavLink
-                to={customer ? '/account/wishlist' : '/login'}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) => navLinkClass(isActive)}
-              >
-                Wishlist
-              </NavLink>
+                <NavLink
+                  to={customer ? '/account' : '/login'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) => mobileNavLinkClass(isActive)}
+                >
+                  {customer ? 'My Account' : 'Login'}
+                </NavLink>
 
-              <NavLink
-                to={customer ? '/account' : '/login'}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) => navLinkClass(isActive)}
-              >
-                {customer ? 'My Account' : 'Login'}
-              </NavLink>
-
-              <div className="mt-2 flex items-center gap-2 border-t border-gray-200 pt-3">
-                <a
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
-                >
-                  <FacebookIcon />
-                </a>
-                <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
-                >
-                  <InstagramIcon />
-                </a>
-                <a
-                  href={YOUTUBE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
-                >
-                  <YouTubeIcon />
-                </a>
+                <div className="mt-2 flex items-center gap-2 border-t border-gray-200 pt-3">
+                  <a
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
+                  >
+                    <FacebookIcon />
+                  </a>
+                  <a
+                    href={INSTAGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
+                  >
+                    <InstagramIcon />
+                  </a>
+                  <a
+                    href={YOUTUBE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700/10 text-red-700 transition-colors hover:bg-red-700/20"
+                  >
+                    <YouTubeIcon />
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 });
 
@@ -288,8 +419,16 @@ function navLinkClass(isActive) {
   }`;
 }
 
+function mobileNavLinkClass(isActive) {
+  return `rounded-lg px-3 py-2.5 text-sm font-medium tracking-wide transition-colors ${
+    isActive
+      ? 'bg-red-50 text-red-700'
+      : 'text-gray-700 hover:bg-gray-50 hover:text-red-700'
+  }`;
+}
+
 /* ═══════════════════════════════════════════════
-   CATEGORIES DROPDOWN — FIXED with 2-row wrap
+   CATEGORIES DROPDOWN — DESKTOP (unchanged)
    ═══════════════════════════════════════════════ */
 function CategoriesDropdown({ topCategories, subcategoriesOf }) {
   const [open, setOpen] = useState(false);
@@ -331,13 +470,11 @@ function CategoriesDropdown({ topCategories, subcategoriesOf }) {
             className="absolute left-1/2 top-full z-30 -translate-x-1/2 pt-3"
           >
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black/5">
-              {/* Gold/Red gradient accent bar */}
               <div className="h-1 w-full bg-gradient-to-r from-red-600 via-yellow-600 to-red-600" />
 
               {topCategories.length === 0 ? (
                 <p className="px-6 py-5 text-sm text-gray-600">No categories yet.</p>
               ) : (
-                /* ─── FIX: 4-column grid that wraps into 2 rows ─── */
                 <div className="grid w-[820px] max-w-[90vw] grid-cols-4 divide-x divide-gray-100">
                   {topCategories.map((cat) => {
                     const subs = subcategoriesOf(cat.id);
@@ -404,7 +541,7 @@ function ChevronIcon({ open }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
-      className={cn('transition-transform', open && 'rotate-180')}
+      className={cn('transition-transform duration-200', open && 'rotate-180')}
     >
       <path d="m6 9 6 6 6-6" />
     </svg>
@@ -486,6 +623,14 @@ function MenuIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M3 6h18M3 12h18M3 18h18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M6 6l12 12M18 6L6 18" />
     </svg>
   );
 }

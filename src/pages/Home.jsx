@@ -313,14 +313,12 @@ function Hero({ slide, active, onSelect }) {
       </motion.div>
 
       {/* Mobile overlay: strong at top for text, transparent in the middle so the banner shows, subtle at bottom */}
-<div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/95 via-white/60 to-white/80 sm:hidden" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/95 via-white/60 to-white/80 sm:hidden" />
 
       {/* ───── MOBILE-ONLY CREATIVE ANIMATED LAYER ───── */}
       <div className="pointer-events-none absolute inset-0 -z-[5] overflow-hidden opacity-60 sm:hidden">
-        {/* Warm gradient wash */}
         <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.18),transparent_55%),radial-gradient(ellipse_at_bottom,rgba(185,28,28,0.12),transparent_60%)]" />
 
-        {/* Aurora orbs */}
         <span
           className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-gradient-to-br from-amber-300/50 via-amber-200/30 to-transparent blur-3xl"
           style={{ animation: 'bk-orb-a 14s ease-in-out infinite' }}
@@ -334,7 +332,6 @@ function Hero({ slide, active, onSelect }) {
           style={{ animation: 'bk-orb-c 16s ease-in-out infinite' }}
         />
 
-        {/* Rotating mandala */}
         <motion.svg
           viewBox="0 0 200 200"
           className="absolute left-1/2 top-1/2 h-[24rem] w-[24rem] -translate-x-1/2 -translate-y-1/2 opacity-[0.18]"
@@ -367,7 +364,6 @@ function Hero({ slide, active, onSelect }) {
           })}
         </motion.svg>
 
-        {/* Saffron thread waves */}
         <motion.svg
           viewBox="0 0 400 800"
           preserveAspectRatio="none"
@@ -395,7 +391,6 @@ function Hero({ slide, active, onSelect }) {
           />
         </motion.svg>
 
-        {/* Rotating conic ring */}
         <span
           className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25"
           style={{
@@ -408,7 +403,6 @@ function Hero({ slide, active, onSelect }) {
           }}
         />
 
-        {/* Floating particles */}
         {Array.from({ length: 18 }).map((_, i) => {
           const left = (i * 37) % 100;
           const size = 2 + ((i * 7) % 5);
@@ -444,7 +438,6 @@ function Hero({ slide, active, onSelect }) {
           );
         })}
 
-        {/* Leafy flourish — top-left */}
         <svg
           className="absolute -left-6 top-4 h-40 w-40 text-red-700/30"
           viewBox="0 0 200 200"
@@ -470,7 +463,6 @@ function Hero({ slide, active, onSelect }) {
           ))}
         </svg>
 
-        {/* Leafy flourish — bottom-right */}
         <svg
           className="absolute -right-6 bottom-4 h-44 w-44 text-amber-600/40"
           viewBox="0 0 200 200"
@@ -496,7 +488,6 @@ function Hero({ slide, active, onSelect }) {
           ))}
         </svg>
 
-        {/* Sheen sweep */}
         <span
           className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
           style={{ animation: 'bk-sheen 6s ease-in-out infinite' }}
@@ -506,7 +497,7 @@ function Hero({ slide, active, onSelect }) {
 
       <motion.div
         style={{ opacity: fade }}
-        className="relative mx-auto flex min-h-[80vh] max-w-7xl flex-col px-4 pb-6 pt-3 sm:min-h-[70vh] sm:justify-center sm:px-8 sm:py-14 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
+        className="relative mx-auto flex min-h-[80vh] max-w-7xl flex-col px-3 pb-6 pt-3 sm:min-h-[70vh] sm:justify-center sm:px-8 sm:py-14 lg:min-h-[calc(100vh-180px)] lg:pl-12 xl:pl-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -554,18 +545,17 @@ function Hero({ slide, active, onSelect }) {
             ))}
           </motion.div>
 
-          {/* ── Centered floating banner image (mobile only) ── */}
-                 {/* ── Centered floating banner image (mobile only) ── */}
+          {/* ── Centered floating banner image (mobile only) — wider card ── */}
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 1.0, duration: 0.7, ease: EASE }}
-            className="relative mx-auto mt-4 w-full max-w-[19rem] self-center sm:hidden"
+            className="relative mx-auto mt-4 w-full max-w-[24rem] self-center sm:hidden"
           >
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/70 bg-white p-1.5 shadow-[0_20px_45px_-15px_rgba(185,28,28,0.35)]"
+              className="relative aspect-[5/6] overflow-hidden rounded-[2rem] border border-white/70 bg-white p-1.5 shadow-[0_20px_45px_-15px_rgba(185,28,28,0.35)]"
             >
               <AnimatePresence mode="wait">
                 <motion.img
