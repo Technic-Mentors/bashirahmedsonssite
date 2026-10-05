@@ -66,13 +66,18 @@ const GlobalStyle = () => (
     @keyframes bk-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
     @keyframes bk-rise{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-90vh) scale(0.4);opacity:0}}
     @keyframes bk-sheen{0%{transform:translateX(0)}60%,100%{transform:translateX(500%)}}
+    @keyframes bk-deals-marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    @keyframes bk-stock-pulse{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,0.55)}50%{opacity:0.95;transform:scale(1.04);box-shadow:0 0 0 6px rgba(220,38,38,0)}}
     .bk-marquee{animation:bk-marquee 30s linear infinite}
+    .bk-deals-marquee{animation:bk-deals-marquee 40s linear infinite}
+    .bk-deals-marquee:hover{animation-play-state:paused}
+    .bk-stock-pulse{animation:bk-stock-pulse 2s ease-in-out infinite}
     .bk-shine::after{content:'';position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:bk-shine 3.2s ease-in-out infinite}
     .bk-float{animation:bk-float 6s ease-in-out infinite}
     .bk-blob{animation:bk-blob 14s ease-in-out infinite}
     .bk-gold-text{background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a,#f59e0b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bk-gradient 5s linear infinite}
     .bk-noscroll::-webkit-scrollbar{display:none}.bk-noscroll{scrollbar-width:none}
-    @media (prefers-reduced-motion:reduce){.bk-marquee,.bk-shine::after,.bk-float,.bk-blob,.bk-gold-text{animation:none}}
+    @media (prefers-reduced-motion:reduce){.bk-marquee,.bk-deals-marquee,.bk-stock-pulse,.bk-shine::after,.bk-float,.bk-blob,.bk-gold-text{animation:none}}
   `}</style>
 );
 
@@ -153,6 +158,7 @@ function CompactCard({ product }) {
   const navigate = useNavigate();
   const customer = useAuthStore((s) => s.customer);
   const { has, toggle, load, loaded } = useWishlistStore();
+  const [burst, setBurst] = useState(false);
 
   useEffect(() => {
     if (customer && !loaded) load();
@@ -177,6 +183,10 @@ function CompactCard({ product }) {
     }
     try {
       await toggle(product);
+      if (!isWishlisted) {
+        setBurst(true);
+        setTimeout(() => setBurst(false), 700);
+      }
     } catch {
       toast.error('Something went wrong.');
     }
@@ -208,7 +218,7 @@ function CompactCard({ product }) {
         ) : null}
 
         {lowStock && (
-          <span className="absolute bottom-2 left-2 rounded-md bg-red-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">
+          <span className="bk-stock-pulse absolute bottom-2 left-2 rounded-md bg-red-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">
             Only {totalStock} left
           </span>
         )}
@@ -219,11 +229,43 @@ function CompactCard({ product }) {
         aria-label="Toggle wishlist"
         whileTap={{ scale: 0.8 }}
         onClick={handleWishlist}
-        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 shadow backdrop-blur transition hover:scale-110"
+        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 shadow backdrop-blur transition hover:scale-110"
       >
         <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 transition-colors ${isWishlisted ? 'fill-red-600 stroke-red-600' : 'fill-none stroke-neutral-500'}`} strokeWidth="2">
           <path d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0112 6a5.4 5.4 0 019.3 6c-2.3 4.4-9.3 9-9.3 9z" />
         </svg>
+
+        {/* Heart burst */}
+        <AnimatePresence>
+          {burst && (
+            <motion.span
+              key="burst"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {Array.from({ length: 8 }).map((_, i) => {
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 22 + (i % 2) * 6;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+                return (
+                  <motion.span
+                    key={i}
+                    className="absolute text-red-500"
+                    style={{ fontSize: 9 + (i % 3) * 2 }}
+                    initial={{ x: 0, y: 0, scale: 0.4, opacity: 1 }}
+                    animate={{ x: dx, y: dy, scale: 0.9, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                  >
+                    ♥
+                  </motion.span>
+                );
+              })}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.button>
 
       <div className="flex flex-1 flex-col gap-1 p-2.5">
@@ -295,8 +337,30 @@ function Hero({ slide, active, onSelect }) {
   const imgY = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  // Cursor glow (desktop only)
+  const glowX = useMotionValue(-200);
+  const glowY = useMotionValue(-200);
+  const smoothX = useSpring(glowX, { stiffness: 120, damping: 20, mass: 0.6 });
+  const smoothY = useSpring(glowY, { stiffness: 120, damping: 20, mass: 0.6 });
+
+  const handleHeroMove = (e) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  };
+  const handleHeroLeave = () => {
+    glowX.set(-200);
+    glowY.set(-200);
+  };
+
   return (
-    <section ref={ref} className="relative isolate overflow-hidden bg-white">
+    <section
+      ref={ref}
+      onMouseMove={handleHeroMove}
+      onMouseLeave={handleHeroLeave}
+      className="relative isolate overflow-hidden bg-white"
+    >
       <motion.div style={{ y: imgY }} className="absolute inset-0 -z-10">
         <AnimatePresence mode="wait">
           <motion.img
@@ -311,6 +375,24 @@ function Hero({ slide, active, onSelect }) {
           />
         </AnimatePresence>
       </motion.div>
+
+      {/* Cursor-follow glow (desktop only) */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute hidden h-72 w-72 rounded-full sm:block"
+        style={{
+          left: smoothX,
+          top: smoothY,
+          translateX: '-50%',
+          translateY: '-50%',
+          background:
+            'radial-gradient(circle, rgba(251,191,36,0.35) 0%, rgba(251,191,36,0.15) 35%, rgba(251,191,36,0) 70%)',
+          filter: 'blur(6px)',
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      />
 
       {/* Mobile overlay: strong at top for text, transparent in the middle so the banner shows, subtle at bottom */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/95 via-white/60 to-white/80 sm:hidden" />
@@ -800,6 +882,10 @@ function TimeBox({ value, label }) {
 function FlashDeals({ items, endDate }) {
   const { h, m, s } = useCountdown(endDate);
   if (!items?.length) return null;
+
+  // Duplicate the list so the marquee loops seamlessly (translateX -50% brings us back to start)
+  const loop = [...items, ...items];
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-red-800 via-red-700 to-[#4a0a0a] py-12">
       <div className="bk-blob pointer-events-none absolute -right-20 -top-20 h-72 w-72 bg-amber-400/20 blur-3xl" />
@@ -824,19 +910,22 @@ function FlashDeals({ items, endDate }) {
           </div>
         </div>
 
-        <motion.div
-          variants={stagger(0.07)}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="bk-noscroll -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0"
+        {/* ── Auto-scrolling marquee row ── */}
+        <div
+          className="bk-noscroll -mx-4 overflow-hidden px-4 pb-3 sm:mx-0 sm:px-0"
+          style={{
+            maskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+          }}
         >
-          {items.slice(0, 8).map((p) => (
-            <div key={p.id} className="w-36 shrink-0 sm:w-44">
-              <CompactCard product={p} />
-            </div>
-          ))}
-        </motion.div>
+          <div className="bk-deals-marquee flex w-max gap-3">
+            {loop.map((p, idx) => (
+              <div key={`${p.id}-${idx}`} className="w-36 shrink-0 sm:w-44">
+                <CompactCard product={p} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

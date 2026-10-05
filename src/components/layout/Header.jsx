@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useCartStore, cartItemCount } from '../../store/useCartStore';
 import { useWishlistStore } from '../../store/useWishlistStore';
@@ -35,6 +35,25 @@ const Header = React.forwardRef(function Header(_, ref) {
   const topCategories = (categories || []).filter((c) => !c.parent_id);
   const subcategoriesOf = (id) =>
     (categories || []).filter((c) => c.parent_id === id);
+
+  /* ── Cart icon pop + count bump, triggered whenever cart count changes ── */
+  const cartControls = useAnimationControls();
+  const prevCountRef = useRef(count);
+  const [cartBump, setCartBump] = useState(false);
+
+  useEffect(() => {
+    // Only pop when the count actually increases (not on initial mount or on removal)
+    if (count > prevCountRef.current) {
+      cartControls.start({
+        scale: [1, 1.35, 0.9, 1.08, 1],
+        rotate: [0, -12, 10, -4, 0],
+        transition: { duration: 0.6, ease: 'easeOut' },
+      });
+      setCartBump(true);
+      setTimeout(() => setCartBump(false), 650);
+    }
+    prevCountRef.current = count;
+  }, [count, cartControls]);
 
   useEffect(() => {
     if (customer && !wishlistLoaded) {
@@ -182,18 +201,35 @@ const Header = React.forwardRef(function Header(_, ref) {
                 <UserIcon />
               </Link>
 
-              <Link
-                to="/cart"
-                aria-label="Cart"
-                className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
-              >
-                <CartIcon />
-                {count > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white">
-                    {count}
-                  </span>
-                )}
-              </Link>
+              {/* ── Cart icon with auto pop + count bump on item add ── */}
+              <motion.div animate={cartControls} className="relative">
+                <Link
+                  to="/cart"
+                  aria-label="Cart"
+                  className="relative flex h-[19px] w-[19px] items-center justify-center text-gray-600 hover:text-red-700"
+                >
+                  <CartIcon />
+
+                  <AnimatePresence>
+                    {count > 0 && (
+                      <motion.span
+                        key={`cart-${count}`}
+                        initial={{ scale: 0, y: -6, opacity: 0 }}
+                        animate={{
+                          scale: cartBump ? [1, 1.5, 1] : 1,
+                          y: 0,
+                          opacity: 1,
+                        }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+                        className="absolute -right-2 -top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-700 text-[10px] font-semibold text-white"
+                      >
+                        {count}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </motion.div>
             </div>
 
             <button
